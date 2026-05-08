@@ -3,7 +3,29 @@ import { useState, useEffect } from 'react'
 const defaultOBJ = { title: '', author: '', body: '', public: false };
 
 function App() {
+  const [dataForm, setDataForm] = useState(defaultOBJ);
 
+  const changeHandler = (event) => {
+    const { name, value, type, checked } = event.target;
+    const newDataForm = { ...dataForm, [name]: type === 'checkbox' ? checked : value };
+    setDataForm(newDataForm);
+  }
+
+  const submitHandler = (event) => {
+    event.preventDefault();
+    fetch('https://67c5b4f3351c081993fb1ab6.mockapi.io/api/posts', {
+      // Se non mettete questa proprietà le API non funzioneranno XD
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      method: 'POST',
+      body: JSON.stringify(dataForm)
+    }).then(response => {
+      return response.json();
+    }).then(json => {
+      console.log('Risposta server', json);
+    });
+  }
 
 
   return (
