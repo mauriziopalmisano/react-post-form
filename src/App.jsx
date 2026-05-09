@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import CardsMessage from './components/CardsMessage';
 import Form from './components/Form';
+import { ArrowRepeat } from 'react-bootstrap-icons';
 
 const defaultOBJ = { title: '', author: '', body: '', public: false };
 const URL_API = 'https://67c5b4f3351c081993fb1ab6.mockapi.io/api/posts';
@@ -9,6 +10,11 @@ const URL_API = 'https://67c5b4f3351c081993fb1ab6.mockapi.io/api/posts';
 function App() {
   const [dataForm, setDataForm] = useState(defaultOBJ);
   const [dataStoredMessages, setStoredMessages] = useState([]);
+
+
+
+
+
 
   const changeHandler = (event) => {
     const { name, value, type, checked } = event.target;
@@ -37,6 +43,11 @@ function App() {
     });
   }
 
+  const removeMessage = (id) => {
+    const updatedMessageList = dataStoredMessages.filter(message => message.id !== id);
+    setStoredMessages(updatedMessageList);
+  }
+
   const fetchMessaggiGet = () => {
     fetch(URL_API)
       .then(response => {
@@ -44,7 +55,7 @@ function App() {
       }).then(json => {
         const listMessages = json.map(message => {
           const { author, title, body, public: pubblico } = message;
-          const newMessage = { ...defaultOBJ, id: crypto.randomUUID, author, title, body, public: pubblico };
+          const newMessage = { ...defaultOBJ, id: crypto.randomUUID(), author, title, body, public: pubblico };
           return newMessage;
         });
         setStoredMessages(listMessages);
@@ -61,20 +72,28 @@ function App() {
 
   return (
     <>
-      <div className='container'>
-        <h1 className='text-center'>Inserisci un nuovo Messaggio</h1>
-        <Form
-          submitHandler = {submitHandler}
-          changeHandler = {changeHandler}
-          dataForm = {dataForm}
-        />
-        <div className='row'>
-          <div className='col text-center my-3'>
-            <h2>Messaggi salvati</h2>
+      <div className='sfondo-moderno'>
+        <div className='container'>
+          <div className='row'>
+            <div className='col-12'>
+              <h1 className='text-center'>Inserisci un nuovo Messaggio</h1>
+            </div>
           </div>
-          <CardsMessage
-          dataMessages= {dataStoredMessages}
+          <Form
+            submitHandler={submitHandler}
+            changeHandler={changeHandler}
+            dataForm={dataForm}
           />
+          <div className='row'>
+            <div className='col-12 text-center my-3 d-flex justify-content-center align-items-center column-gap-2'>
+              <h2>Messaggi salvati</h2>
+              <button className='btn btn-outline-primary d-flex justify-content-center align-items-center box-shadow' onClick={() => fetchMessaggiGet()}><ArrowRepeat /></button>
+            </div>
+            <CardsMessage
+              remove = {removeMessage}
+              dataMessages={dataStoredMessages}
+            />
+          </div>
         </div>
       </div>
     </>
