@@ -1,9 +1,12 @@
 import { useState, useEffect } from 'react'
 
 const defaultOBJ = { title: '', author: '', body: '', public: false };
+const URL_API = 'https://67c5b4f3351c081993fb1ab6.mockapi.io/api/posts';
+
 
 function App() {
   const [dataForm, setDataForm] = useState(defaultOBJ);
+  const [dataStoredMessages, setStoredMessages] = useState([]);
 
   const changeHandler = (event) => {
     const { name, value, type, checked } = event.target;
@@ -13,7 +16,7 @@ function App() {
 
   const submitHandler = (event) => {
     event.preventDefault();
-    fetch('https://67c5b4f3351c081993fb1ab6.mockapi.io/api/posts', {
+    fetch(URL_API, {
       // Se non mettete questa proprietà le API non funzioneranno XD
       headers: {
         'Content-Type': 'application/json'
@@ -24,8 +27,34 @@ function App() {
       return response.json();
     }).then(json => {
       console.log('Risposta server', json);
+      alert('messaggio inviato con successo');
+      setDataForm(defaultOBJ);
+      fetchMessaggiGet();
+    }).catch(error => {
+      alert(`messaggio non inviato ${error}`);
     });
   }
+
+  const fetchMessaggiGet = () => {
+    fetch(URL_API)
+      .then(response => {
+        return response.json();
+      }).then(json => {
+        const listMessages = json.map(message => {
+          const { author, title, body, public: pubblico } = message;
+          const newMessage = { ...defaultOBJ, id: crypto.randomUUID, author, title, body, public: pubblico };
+          return newMessage;
+        });
+        setStoredMessages(listMessages);
+      }).catch(error => {
+        alert(`eeeeh abbiamo superato il kilowatt ${error}`);
+      });
+  }
+
+  useEffect(() => {
+    fetchMessaggiGet();
+  }, []);
+
 
 
   return (
@@ -62,13 +91,27 @@ function App() {
           <div className='col-12 my-3'>
             <button type="submit" className="btn btn-dark">Aggiungi</button>
           </div>
-          <div className="mt-4 p-3 bg-light border rounded">
-            <small className="text-muted d-block mb-1">
-              Stato corrente (debug):
-            </small>
-            <code className="small">{JSON.stringify(dataForm, null, 2)}</code>
-          </div>
         </form>
+        <div className='row'>
+          <div className='col text-center my-3'>
+            <h2>Messaggi salvati</h2>
+          </div>
+          {dataStoredMessages.map(message => {
+            const { id, author, title, body, public: pubblico } = message;
+            return (pubblico && (
+              <div key={id} className='col=12'>
+                <div className="card">
+                  <div className="card-body">
+                    <h5 className="card-title"><strong>Titolo:</strong><br />{title}</h5>
+                    <h6 className="card-subtitle mb-2 text-body-secondary"><strong>Autore:</strong><br /> {author}</h6>
+                    <p className="card-text"><strong>Messaggio:</strong><br />{body}</p>
+                  </div>
+                </div>
+              </div>
+            )
+            )
+          })}
+        </div>
       </div>
     </>
   )
